@@ -1,0 +1,28 @@
+* 1.5.1 - Sat 5 Oct
+	- commandline parameter for selecting weeks
+	- filename fix following coursera updatex
+	- correctly handle courses with hyphens in the name
+
+* 1.5 - Fri 13 Sep
+	- code cleanups
+	- fixed proxy support
+	- added option to automatically gzip courses
+	- crash less on long filenames on windows
+	- also download about json file
+	- small bugfixes
+
+* 1.4.11 - Fri 23 Aug
+	- update to new coursera authentication details
+
+* 1.4.10 - Sun 30 Jun
+	- made html.parser the default
+
+* 1.4.9 - Wed 19 Jun
+	- small bug/crash fixes
+	- long filename trimming on windows
+
+* 1.4.8 - Sun 28 Apr
+	- netrc support for caching credentials
+	- added explict timeouts when downloading files
+	- small bugfixes and code cleanups
+
