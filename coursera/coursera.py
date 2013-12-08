@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import argparse
+import logging
 
 from utils import HelpFormatter
 
@@ -278,6 +279,18 @@ def parse_args():
 
 def main():
     args = parse_args()
+
+    # Initialize the logging system first so that other functions
+    # can use it right away
+    if args.debug:
+        logging.basicConfig(level=logging.DEBUG,
+                            format='%(name)s[%(funcName)s] %(message)s')
+    elif args.quiet:
+        logging.basicConfig(level=logging.ERROR,
+                            format='%(name)s: %(message)s')
+    else:
+        logging.basicConfig(level=logging.INFO,
+                            format='%(message)s')
 
 
 if __name__ == '__main__':
