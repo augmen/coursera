@@ -5,11 +5,13 @@ import argparse
 import getpass
 import logging
 import os
+import shutil
 import sys
+import tempfile
 
-from utils import HelpFormatter, netrc_credentials
 import _version
 
+from utils import HelpFormatter, mkdir_p, netrc_credentials
 
 def parse_args():
     """Parse the command line arguments/options.
@@ -329,6 +331,27 @@ def validate_args(args):
             if not args.password:
                 args.password = getpass.getpass(
                     'Coursera password for {0}: '.format(args.username))
+
+    if args.no_cache_dir:
+        args.cache_dir = None
+    else:
+        if not args.cache_dir:
+            # define a per-user cache folder
+            if os.name == "posix":
+                import pwd
+                user = pwd.getpwuid(os.getuid())[0]
+            else:
+                user = getpass.getuser()
+
+            args.cache_dir = os.path.join(tempfile.gettempdir(),
+                                          user + "_coursera-dl_cache")
+
+        mkdir_p(args.cache_dir, 0o700)
+        if args.clear_cache:
+            shutil.rmtree(args.cache_dir)
+            mkdir_p(args.cache_dir, 0o700)
+
+        logging.debug("Cache dir: %s", args.cache_dir)
 
     return args
 
