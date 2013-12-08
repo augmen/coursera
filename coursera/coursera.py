@@ -313,7 +313,8 @@ def validate_args(args):
         if not os.path.exists(args.cookies):
             logging.error("Cookies file not found: %s", args.cookies)
             sys.exit(1)
-    else:
+    # We don't need credentials to download preview videos
+    elif not args.preview:
         if args.netrc:
             credentials = netrc_credentials(
                 None if args.netrc is True else args.netrc)
