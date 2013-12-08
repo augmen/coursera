@@ -1,4 +1,9 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import argparse
+
+from utils import HelpFormatter
 
 
 def parse_args():
@@ -10,7 +15,8 @@ def parse_args():
         description="""Coursera-dl is a python package for downloading
         course videos and resources available at coursera.org.
         """,
-        add_help=False)
+        add_help=False,
+        formatter_class=HelpFormatter)
 
     positional = parser.add_argument_group('Positional arguments')
     general = parser.add_argument_group('General options')
