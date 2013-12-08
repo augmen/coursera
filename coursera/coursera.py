@@ -5,6 +5,7 @@ import argparse
 import logging
 
 from utils import HelpFormatter
+import _version
 
 
 def parse_args():
@@ -42,6 +43,7 @@ def parse_args():
     general.add_argument('--version',
                          action='version',
                          version='2.0.0')
+                         version=_version.__version__)
     general.add_argument('--preview',
                          dest='preview',
                          action='store_true',
