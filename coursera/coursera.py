@@ -330,6 +330,8 @@ def main():
 
     args = validate_args(args)
 
+    logging.info("Coursera-dl v%s (%s)" % (_version.__version__, args.parser))
+
 
 if __name__ == '__main__':
     main()
