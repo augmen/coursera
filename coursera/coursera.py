@@ -3,6 +3,8 @@
 
 import argparse
 import logging
+import os
+import sys
 
 from utils import HelpFormatter
 import _version
@@ -42,7 +44,6 @@ def parse_args():
                          help='show this help message and exit')
     general.add_argument('--version',
                          action='version',
-                         version='2.0.0')
                          version=_version.__version__)
     general.add_argument('--preview',
                          dest='preview',
@@ -73,7 +74,7 @@ def parse_args():
                          metavar='URL',
                          default=None,
                          help='use the specified HTTP/HTTPS proxy')
-    general.add_argument('--hook',
+    general.add_argument('--hooks',
                          dest='hooks',
                          action='append',
                          default=[],
@@ -111,8 +112,8 @@ def parse_args():
     # Filtering Options
     filter.add_argument('--sections',
                         metavar='NUMBERS',
-                        dest='section',
-                        default=None,
+                        dest='sections',
+                        default='',
                         help='space separated list of section numbers'
                              ' to download, e.g. "1 3 8"')
     filter.add_argument('-f',
@@ -120,14 +121,13 @@ def parse_args():
                         metavar='EXTENSIONS',
                         dest='formats',
                         action='store',
-                        default='all',
-                        help="""space separated list of file extensions
-                             to download, e.g "mp4 pdf"
-                             (default: special value "all")""")
+                        default='',
+                        help='space separated list of file extensions'
+                             ' to download, e.g "mp4 pdf"')
     filter.add_argument('--skip-formats',
                         dest='skip_formats',
                         metavar='EXTENSIONS',
-                        default=None,
+                        default='',
                         help='space separated list of file extensions to skip,'
                              ' e.g., "ppt srt pdf"')
     filter.add_argument('-sf',
@@ -279,6 +279,40 @@ def parse_args():
     return parser.parse_args()
 
 
+def validate_args(args):
+    """Validate and sanitize the command line arguments/options, fail fast.
+    """
+
+    # Check the parser
+    if args.parser == "html.parser" and sys.version_info < (2, 7, 3):
+        logging.info("Warning: 'html.parser' may cause problems"
+                     " on Python < 2.7.3")
+    if args.parser not in ['html5lib', 'html.parser', 'lxml']:
+        logging.error("Invalid parser: '%s',"
+                      " choose from 'html5lib', 'html.parser', 'lxml'",
+                      args.parser)
+        sys.exit(1)
+
+    # Check if sections is a list of integers
+    try:
+        args.sections = [int(x) for x in args.sections.split()]
+    except Exception as e:
+        logging.error("Invalid sections list, this should be a"
+                      " list of integers.")
+        sys.exit(1)
+
+    # Split string of extensions, remove prefixing dot if there is one
+    args.formats = [s.lstrip('.') for s in args.formats.split()]
+    args.skip_formats = [s.lstrip('.') for s in args.skip_formats.split()]
+
+    # Check if cookies file exists
+    if args.cookies and not os.path.exists(args.cookies):
+        logging.error("Cookies file not found: %s", args.cookies)
+        sys.exit(1)
+
+    return args
+
+
 def main():
     args = parse_args()
 
@@ -293,6 +327,8 @@ def main():
     else:
         logging.basicConfig(level=logging.INFO,
                             format='%(message)s')
+
+    args = validate_args(args)
 
 
 if __name__ == '__main__':
