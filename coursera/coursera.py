@@ -5,6 +5,7 @@ import argparse
 import getpass
 import logging
 import os
+import platform
 import shutil
 import sys
 import tempfile
@@ -12,6 +13,62 @@ import tempfile
 import _version
 
 from utils import HelpFormatter, mkdir_p, netrc_credentials
+
+
+class CourseraDownloader(object):
+    """
+    Class to download content (videos, lecture notes, ...) from coursera.org
+    for use offline.
+
+    Available options:
+
+    preview:             If True, download preview videos.
+    download_about:      Additionally download about metadata to about.json.
+    reverse:             If True, download and save sections in reverse order.
+    parser:              Html parser [html5lib html.parser lxml], see more at
+                         http://www.crummy.com/software/BeautifulSoup/
+                         bs4/doc/#installing-a-parser
+    proxy:               HTTP/HTTPS proxy.
+    hooks:               Hooks to run when finished.
+    username:            Coursera username, not required for preview videos.
+    password:            Coursera password, not required for preview videos.
+    playlist:            Generate M3U playlist for every course section.
+    sections:            List of section numbers to download.
+    formats:             List of file extensions to download.
+    skip_formats:        List of file extensions to skip.
+    section_filter:      Only download the sections which match the regex.
+    lecture_filter:      Only download the lectures which match the regex.
+    resource_filter:     Only download the resources which match the regex.
+    destination:         Download files to this location, default is pwd.
+    output:              Output filename template.
+    archive:             If True, tarball courses for archival storage.
+    overwrite:           If True, overwrite already downloaded files.
+    max_filename_length: Maximum length of filenames/directories in a path.
+                         Default value is 90 for Windows, o.w. unlimited.
+    wget:                Download with given wget binary.
+    curl:                Download with given curl binary.
+    aria2:               Download with given aria2 binary.
+    axel:                Download with given axel binary.
+    cookies:             File to read cookies from (skips authentication).
+    lectures_page:       Uses/creates local cached version of lectures page.
+    skip_download:       Do not download files.
+    simulate:            Do not download the files and
+                         do not write anything to disk.
+    cache_dir:           Location in the filesystem where we can store
+                         downloaded information permanently, set to None
+                         to disable caching.
+    """
+
+    def __init__(self, params):
+        # TODO: this is a simple hack, something more elaborate needed
+        # Linux max path length is typically around 4060 so assume that's ok
+        if not params.max_filename_length and platform.system() == "Windows":
+            params.max_filename_length = 90
+            logging.info("Maximum filename length set to %s",
+                         params.max_filename_length)
+
+        self.params = params
+
 
 def parse_args():
     """Parse the command line arguments/options.
@@ -188,7 +245,7 @@ def parse_args():
                             metavar="NUMBER",
                             dest='max_filename_length',
                             type=int,
-                            default=100,
+                            default=None,
                             help='maximum length of filenames/directories'
                                  ' in a path (windows only)')
 
@@ -236,7 +293,7 @@ def parse_args():
                            metavar='FILE',
                            dest='lectures_page',
                            help='uses/creates local cached version of'
-                                ' syllabus lectures page')
+                                ' lectures page')
     debugging.add_argument('--skip-download',
                            dest='skip_download',
                            action='store_true',
@@ -376,6 +433,8 @@ def main():
 
     logging.info("Coursera-dl v%s (%s)" % (_version.__version__, args.parser))
 
+    # Instantiate the downloader class
+    d = CourseraDownloader(args)
 
 if __name__ == '__main__':
     main()
