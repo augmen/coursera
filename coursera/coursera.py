@@ -92,7 +92,7 @@ def parse_args():
 
     # Positional argument
     positional.add_argument('course',
-                            nargs='*',
+                            nargs='+',
                             help="""one or more courses to download, use the
                                  identifier from the course URL:
                                  https://class.coursera.org/<course>""")
