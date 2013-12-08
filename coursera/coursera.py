@@ -2,11 +2,12 @@
 # -*- coding: utf-8 -*-
 
 import argparse
+import getpass
 import logging
 import os
 import sys
 
-from utils import HelpFormatter
+from utils import HelpFormatter, netrc_credentials
 import _version
 
 
@@ -105,7 +106,7 @@ def parse_args():
                                 nargs='?',
                                 action='store',
                                 const=True,
-                                default=False,
+                                default=None,
                                 help='use netrc for reading passwords, uses '
                                      'default location if no file specified')
 
@@ -305,10 +306,29 @@ def validate_args(args):
     args.formats = [s.lstrip('.') for s in args.formats.split()]
     args.skip_formats = [s.lstrip('.') for s in args.skip_formats.split()]
 
-    # Check if cookies file exists
-    if args.cookies and not os.path.exists(args.cookies):
-        logging.error("Cookies file not found: %s", args.cookies)
-        sys.exit(1)
+    # We do not need the username/password if a cookies file is specified
+    if args.cookies:
+        if not os.path.exists(args.cookies):
+            logging.error("Cookies file not found: %s", args.cookies)
+            sys.exit(1)
+    else:
+        if args.netrc:
+            credentials = netrc_credentials(
+                None if args.netrc is True else args.netrc)
+            if credentials is None:
+                logging.error("No credentials found in .netrc file")
+                sys.exit(1)
+            logging.info("Credentials found in .netrc file")
+            args.username = credentials[0]
+            args.password = credentials[1]
+        else:
+            if not args.username:
+                logging.error('Please provide a username with the -u option, '
+                              'or a .netrc file with the -n option.')
+                sys.exit(1)
+            if not args.password:
+                args.password = getpass.getpass(
+                    'Coursera password for {0}: '.format(args.username))
 
     return args
 
