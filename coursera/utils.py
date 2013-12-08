@@ -1,7 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+"""
+This module provides utility functions that are used within the script.
+"""
+
 import argparse
+import errno
 import logging
 import netrc
 import os
@@ -134,3 +139,17 @@ def netrc_credentials(path=None):
             pass
 
     return credentials
+
+
+def mkdir_p(path, mode=0o777):
+    """
+    Create subdirectory hierarchy given in the paths argument.
+    """
+
+    try:
+        os.makedirs(path, mode)
+    except OSError as exc:
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
