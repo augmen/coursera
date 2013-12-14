@@ -53,7 +53,7 @@ import tempfile
 
 import _version
 
-from utils import HelpFormatter, mkdir_p, netrc_credentials
+from utils import *
 
 
 class CourseraDownloader(object):
@@ -468,20 +468,32 @@ def validate_args(args):
     return args
 
 
+def logging_config(format, level):
+    """Like logging.basicConfig, but with custom Formatter/Filter."""
+
+    root = logging.getLogger()
+    if len(root.handlers) == 0:
+        handler = logging.StreamHandler(sys.stdout)
+        handler.setFormatter(IndentingFormatter(format))
+        root.addHandler(handler)
+        root.addFilter(CountingFilter())
+        root.setLevel(level)
+
+
 def main():
     args = parse_args()
 
     # Initialize the logging system first so that other functions
     # can use it right away
     if args.debug:
-        logging.basicConfig(level=logging.DEBUG,
-                            format='%(name)s[%(funcName)s] %(message)s')
+        logging_config(level=logging.DEBUG,
+                       format='%(name)s[%(funcName)s] %(message)s')
     elif args.quiet:
-        logging.basicConfig(level=logging.ERROR,
-                            format='%(name)s: %(message)s')
+        logging_config(level=logging.ERROR,
+                       format='%(name)s: %(message)s')
     else:
-        logging.basicConfig(level=logging.INFO,
-                            format='%(message)s')
+        logging_config(level=logging.INFO,
+                       format='%(indentation)s%(message)s')
 
     args = validate_args(args)
 
