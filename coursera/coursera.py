@@ -270,8 +270,18 @@ def parse_args():
                             metavar='TEMPLATE',
                             dest='output',
                             type=str,
-                            default=".",
-                            help='output filename template')
+                            default="",
+                            help="""output filename template. Use one
+                                 or more of the following fields:\n
+                                 - {name}: resource name\n
+                                 - {ext}: resource ext\n
+                                 - {filename}: resource filename
+                                 (includes ext)\n
+                                 - {section_index}: position in section list\n
+                                 - {section_name}: section name\n
+                                 - {lecture_index}: position in lecture list\n
+                                 - {lecture_name}: lecture name
+                                 """)
     filesystem.add_argument('--archive',
                             dest='archive',
                             action='store_true',
