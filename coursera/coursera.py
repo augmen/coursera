@@ -52,6 +52,7 @@ import sys
 import tempfile
 
 import requests
+import cookies
 import _version
 
 from define import ABOUT_URL, LECTURE_URL, PREVIEW_URL
@@ -166,6 +167,43 @@ class CourseraDownloader(object):
         self.session.params['timeout'] = self.TIMEOUT
 
         return self.session
+
+    def get_course_cookies(self, course):
+        """
+        Get the cookies for the given course, and add them to
+        the current session.
+
+        We do not validate the cookies if they are loaded from a cookies file
+        because this is intended for debugging purposes or if the coursera
+        authentication process has changed.
+
+        Returns True if the cookies are retrieved successfully.
+        """
+        if self.cookies:
+            cookie_jar = cookies.read_for_course(self.cookies, course)
+            self.session.cookies.update(cookie_jar)
+            logging.info('Loaded cookies from %s', self.cookies)
+        else:
+            if self.cache_dir:
+                cached_cookies_file = os.path.join(
+                    self.cache_dir,
+                    'cookies_' + self.username + '.txt')
+                cookie_jar = cookies.read(cached_cookies_file)
+                self.session.cookies.update(cookie_jar)
+                if cookies.validate_session(self.session, course):
+                    logging.info('Already authenticated.')
+                    return True
+
+            ok = cookies.get_course_cookies(
+                self.session, course,
+                self.username, self. password)
+            if not ok:
+                return False
+
+            if self.cache_dir:
+                cookies.write(self.session.cookies, cached_cookies_file)
+
+        return True
 
     def course_from_url(self, course_url):
         """Given the course URL, return the course name, e.g., algo2012-p2"""
