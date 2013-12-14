@@ -193,3 +193,20 @@ def mkdir_p(path, mode=0o777):
             pass
         else:
             raise
+def clean_url(url):
+    """
+    Strip whitespace characters from the beginning and the end of the url
+    and add a default scheme.
+    """
+
+    if url is None:
+        return None
+
+    url = url.strip()
+
+    if url and not urlparse(url).scheme:
+        url = "http://" + url
+
+    return url
+
+
