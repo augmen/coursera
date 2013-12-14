@@ -12,6 +12,7 @@ import logging
 import netrc
 import os
 import platform
+import re
 
 
 class HelpFormatter(argparse.HelpFormatter):
@@ -21,6 +22,7 @@ class HelpFormatter(argparse.HelpFormatter):
     instead of
         -s ARGS, --long ARGS
     Makes left column 32 characters wide.
+    Allow action descriptions to use \n.
     """
     def __init__(self,
                  prog,
@@ -33,6 +35,8 @@ class HelpFormatter(argparse.HelpFormatter):
                                         indent_increment=indent_increment,
                                         max_help_position=32,
                                         width=width)
+
+        self._whitespace_matcher = re.compile(r'[ \t\r\f\v]+')
 
     def _format_action_invocation(self, action):
         if not action.option_strings:
@@ -53,6 +57,15 @@ class HelpFormatter(argparse.HelpFormatter):
                 args_string = self._format_args(action, default)
 
                 return '{} {}'.format(options_string, args_string)
+
+    def _split_lines(self, text, width):
+        """Allow description to be split with \n, but keep the text wrapping
+        """
+        text = self._whitespace_matcher.sub(' ', text).strip()
+        return [l for line in text.split("\n\n")
+                for l in argparse._textwrap.wrap(
+                    line.strip().replace("\n", ""), width)]
+
 
 
 def netrc_paths():
