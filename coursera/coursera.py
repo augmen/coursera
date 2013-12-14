@@ -101,6 +101,9 @@ class CourseraDownloader(object):
                          to disable caching.
     """
 
+    # How long to try to open a URL before timing out
+    TIMEOUT = 30.0
+
     def __init__(self, params):
         self.params = params
 
@@ -162,6 +165,50 @@ class CourseraDownloader(object):
         self.session.params['timeout'] = self.TIMEOUT
 
         return self.session
+
+    def get_response(self, url, retries=3, method="GET", **kwargs):
+        """
+        Get the response
+        """
+        kwargs.update(allow_redirects=True)
+        for i in range(retries):
+            try:
+                r = self.session.request(method, url, **kwargs)
+                r.raise_for_status()
+            except Exception as e:
+                logging.debug("Retrying to connect url: %s", url)
+                pass
+            else:
+                return r
+
+        raise e
+
+    def get_headers(self, url):
+        """
+        Get the headers
+        """
+        r = self.get_response(url, method="HEAD")
+        headers = r.headers
+        r.close()
+        return headers
+
+    def get_page(self, url):
+        """
+        Get the content
+        """
+        r = self.get_response(url)
+        page = r.content
+        r.close()
+        return page
+
+    def get_json(self, url):
+        """
+        Get the json data
+        """
+        r = self.get_response(url)
+        data = r.json()
+        r.close()
+        return data
 
 
 def parse_args():
