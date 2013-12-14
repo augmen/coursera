@@ -1,6 +1,45 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+"""
+For downloading lecture resources such as videos for Coursera classes. Given
+a class name, username and password, it scrapes the course listing page to
+get the section (week) and lecture names, and then downloads the related
+materials into appropriately named files and directories.
+
+Examples:
+  coursera-dl -u <user> -p <passwd> saas
+  coursera-dl -u <user> -p <passwd> -l listing.html -o saas --skip-download
+
+For further documentation and examples, visit the project's home at:
+  https://github.com/coursera-dl/coursera
+
+Authors and copyright:
+    © 2012-2013, John Lehmann (first last at geemail dotcom or @jplehmann)
+    © 2012-2013, Rogério Brito (r lastname at ime usp br)
+    © 2012-2013, Dirk Gorissen (first at geemail dotcom)
+    © 2013, Jonas De Taeye (first dt at fastmail fm)
+
+Contributions are welcome, but please add new unit tests to test your changes
+and/or features.  Also, please try to make changes platform independent and
+backward compatible.
+
+Legalese:
+
+ This program is free software: you can redistribute it and/or modify it
+ under the terms of the GNU Lesser General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or (at your
+ option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
+
 from __future__ import unicode_literals
 
 import argparse
