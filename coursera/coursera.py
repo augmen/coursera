@@ -377,7 +377,9 @@ def parse_args():
                            default=False,
                            help='clear cached cookies')
 
-    return parser.parse_args()
+    # decode arguments
+    return parser.parse_args(
+        [arg.decode(sys.stdin.encoding) for arg in sys.argv[1:]])
 
 
 def validate_args(args):
