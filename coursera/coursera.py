@@ -204,7 +204,7 @@ def parse_args():
                                 metavar='FILE',
                                 dest='netrc',
                                 nargs='?',
-                                action='store',
+                                action=FullPath,
                                 const=True,
                                 default=None,
                                 help='use netrc for reading passwords, uses '
@@ -263,8 +263,9 @@ def parse_args():
                             dest='destination',
                             type=str,
                             default=".",
-                            help='location in filesystem where everything'
-                                 ' will be saved')
+                            action=FullPath,
+                            help='download everything to the given directory,'
+                                 ' defaults to current directory')
     filesystem.add_argument('-o',
                             '--output',
                             metavar='TEMPLATE',
@@ -371,7 +372,7 @@ def parse_args():
     debugging.add_argument('--cache-dir',
                            metavar='DIR',
                            dest='cache_dir',
-                           action='store',
+                           action=FullPath,
                            default=None,
                            help="""location in the filesystem where %(prog)s
                                 can store downloaded information permanently,
