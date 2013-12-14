@@ -474,7 +474,7 @@ def main():
 
     args = validate_args(args)
 
-    logging.info("Coursera-dl v%s (%s)" % (_version.__version__, args.parser))
+    logging.info("Coursera-dl v%s (%s)", _version.__version__, args.parser)
 
     # Instantiate the downloader class
     d = CourseraDownloader(args)
