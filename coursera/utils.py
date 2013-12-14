@@ -17,6 +17,9 @@ import re
 from os import path
 
 from six import string_types
+from six.moves.urllib.parse import unquote, urlparse, urlsplit
+
+
 class HelpFormatter(argparse.HelpFormatter):
     """Help message formatter which print the optional argument value
     only once, i.e.
@@ -194,6 +197,34 @@ def mkdir_p(path, mode=0o777):
             pass
         else:
             raise
+
+
+def resource_filename_from_url(url):
+    """
+    Extract the resource filename from the given url. We use this to skip
+    http requests in a simulation.
+    """
+
+    # parse the url into its components
+    components = urlsplit(url)
+
+    # split the path into parts and take the last one
+    filename = components.path.strip(" /").split('/')[-1]
+
+    if filename.startswith('download.mp4'):
+        filename = 'video.mp4'
+    else:
+        ext = re.search(r"subtitles.*format=(\w+)$", url)
+        if ext:
+            filename = "subtitles." + ext.group(1)
+        else:
+            # unquoting can introduce slashes
+            filename = unquote(filename).replace("/", "-")
+            filename = sanitize_filename(filename)
+
+    return filename
+
+
 def clean_url(url):
     """
     Strip whitespace characters from the beginning and the end of the url

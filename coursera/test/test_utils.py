@@ -9,6 +9,8 @@ from __future__ import unicode_literals
 import os.path
 import unittest
 
+from six import iteritems
+
 from coursera import utils
 
 NETRC = \
@@ -30,6 +32,17 @@ class UtilsTestCase(unittest.TestCase):
     def test_netrc_credentials_with_invalid_file(self):
         credentials = utils.netrc_credentials(NOT_NETRC)
         self.assertEquals(credentials, None)
+
+    def test_resource_filename_from_url(self):
+        strings = {
+            'https://c.c/l/subtitles?q=19_en&format=txt': 'subtitles.txt',
+            'https://c.c/l/subtitles?q=19_en&format=srt': 'subtitles.srt',
+            'https://d.c/slides%2F14test.pdf': 'slides-14test.pdf',
+            'https://c.c.org/download.mp4?lecture_id=123': 'video.mp4'
+        }
+        for k, v in iteritems(strings):
+            self.assertEquals(utils.resource_filename_from_url(k), v)
+
     def test_clean_url_ads_scheme(self):
         url = "www.coursera.org"
         self.assertEquals(utils.clean_url(url), 'http://www.coursera.org')
