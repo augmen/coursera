@@ -81,7 +81,7 @@ class CourseraDownloader(object):
     lecture_filter:      Only download the lectures which match the regex.
     resource_filter:     Only download the resources which match the regex.
     destination:         Download files to this location, default is pwd.
-    output:              Output filename template.
+    output_template:     Output filename template.
     archive:             If True, tarball courses for archival storage.
     overwrite:           If True, overwrite already downloaded files.
     max_filename_length: Maximum length of filenames/directories in a path.
@@ -268,7 +268,7 @@ def parse_args():
     filesystem.add_argument('-o',
                             '--output',
                             metavar='TEMPLATE',
-                            dest='output',
+                            dest='output_template',
                             type=str,
                             default="",
                             help="""output filename template. Use one
