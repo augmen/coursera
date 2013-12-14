@@ -11,6 +11,7 @@ import os
 COURSE_URL = 'https://class.coursera.org/{course}'
 HOME_URL = COURSE_URL + '/class/index'
 LECTURE_URL = COURSE_URL + '/lecture/index'
+PREVIEW_URL = COURSE_URL + '/lecture/preview'
 AUTH_URL = COURSE_URL + "/auth/auth_redirector?type=login&subtype=normal"
 LOGIN_URL = "https://accounts.coursera.org/api/v1/login"
 ABOUT_URL =\

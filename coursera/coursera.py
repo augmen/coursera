@@ -54,6 +54,7 @@ import tempfile
 import requests
 import _version
 
+from define import ABOUT_URL, LECTURE_URL, PREVIEW_URL
 from utils import *
 
 
@@ -165,6 +166,17 @@ class CourseraDownloader(object):
         self.session.params['timeout'] = self.TIMEOUT
 
         return self.session
+
+    def course_from_url(self, course_url):
+        """Given the course URL, return the course name, e.g., algo2012-p2"""
+        return course_url.split('/')[3]
+
+    def lecture_url_from_course(self, course, preview=False):
+        """Given the name of a course, return the lecture url"""
+        if preview:
+            return PREVIEW_URL.format(course=course)
+
+        return LECTURE_URL.format(course=course)
 
     def get_response(self, url, retries=3, method="GET", **kwargs):
         """
