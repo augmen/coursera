@@ -51,6 +51,7 @@ import shutil
 import sys
 import tempfile
 
+import requests
 import _version
 
 from utils import *
@@ -149,6 +150,18 @@ class CourseraDownloader(object):
 
         self.formats = [s.lower() for s in self.formats]
         self.skip_formats = [s.lower() for s in self.skip_formats]
+
+        self.session = None
+        self.new_session()
+    def new_session(self):
+        self.session = requests.Session()
+
+        #TODO: https
+        if self.proxy:
+            self.session.proxies = {'http': self.proxy}
+        self.session.params['timeout'] = self.TIMEOUT
+
+        return self.session
 
 
 def parse_args():
