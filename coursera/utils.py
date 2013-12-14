@@ -16,6 +16,7 @@ import re
 
 from os import path
 
+from six import string_types
 class HelpFormatter(argparse.HelpFormatter):
     """Help message formatter which print the optional argument value
     only once, i.e.
