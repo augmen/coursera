@@ -76,6 +76,23 @@ class FullPath(argparse._StoreAction):
         setattr(namespace, self.dest, values)
 
 
+class IndentingFormatter(logging.Formatter):
+    def __init__(self, fmt=None, datefmt=None):
+        logging.Formatter.__init__(self, fmt, datefmt)
+        self.indentation = 0
+
+    def indent(self, step=1):
+        self.indentation = max(self.indentation + step, 0)
+
+    def format(self, record):
+        indentation = ""
+        if self.indentation:
+            indentation = 2 * self.indentation * " " + "- "
+
+        record.__dict__['indentation'] = indentation
+        return logging.Formatter.format(self, record)
+
+
 
 def netrc_paths():
     """
