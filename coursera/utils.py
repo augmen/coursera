@@ -5,6 +5,8 @@
 This module provides utility functions that are used within the script.
 """
 
+from __future__ import unicode_literals
+
 import argparse
 import errno
 import logging

@@ -4,6 +4,8 @@
 Test the utility functions.
 """
 
+from __future__ import unicode_literals
+
 import os.path
 import unittest
 

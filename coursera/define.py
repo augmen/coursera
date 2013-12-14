@@ -4,6 +4,8 @@
 This module defines the global constants.
 """
 
+from __future__ import unicode_literals
+
 import os
 
 COURSE_URL = 'https://class.coursera.org/{course}'
