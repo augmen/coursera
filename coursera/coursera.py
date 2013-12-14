@@ -480,6 +480,12 @@ def logging_config(format, level):
         root.setLevel(level)
 
 
+def indent(step=1):
+    root = logging.getLogger()
+    if len(root.handlers):
+        root.handlers[0].formatter.indent(step)
+
+
 def main():
     args = parse_args()
 
