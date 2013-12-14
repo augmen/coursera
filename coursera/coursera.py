@@ -64,7 +64,7 @@ class CourseraDownloader(object):
     Available options:
 
     preview:             If True, download preview videos.
-    download_about:      Additionally download about metadata to about.json.
+    about:      Additionally download about metadata to about.json.
     reverse:             If True, download and save sections in reverse order.
     parser:              Html parser [html5lib html.parser lxml], see more at
                          http://www.crummy.com/software/BeautifulSoup/
@@ -152,7 +152,7 @@ def parse_args():
                          default=False,
                          help='download preview videos instead'
                               ' of the regular course material')
-    general.add_argument('--download-about',
+    general.add_argument('--about',
                          dest='about',
                          action='store_true',
                          default=False,
