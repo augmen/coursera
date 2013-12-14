@@ -546,7 +546,7 @@ def main():
     logging.info("Coursera-dl v%s (%s)", _version.__version__, args.parser)
 
     # Instantiate the downloader class
-    d = CourseraDownloader(args)
+    d = CourseraDownloader(vars(args))
 
 if __name__ == '__main__':
     main()
