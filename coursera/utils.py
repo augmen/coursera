@@ -14,6 +14,7 @@ import os
 import platform
 import re
 
+from os import path
 
 class HelpFormatter(argparse.HelpFormatter):
     """Help message formatter which print the optional argument value
@@ -65,6 +66,14 @@ class HelpFormatter(argparse.HelpFormatter):
         return [l for line in text.split("\n\n")
                 for l in argparse._textwrap.wrap(
                     line.strip().replace("\n", ""), width)]
+
+
+class FullPath(argparse._StoreAction):
+    """Expand user- and relative-paths"""
+    def __call__(self, parser, namespace, values, option_string=None):
+        if isinstance(values, string_types):
+            values = path.abspath(path.expanduser(values))
+        setattr(namespace, self.dest, values)
 
 
 
