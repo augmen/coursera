@@ -439,8 +439,8 @@ def validate_args(args):
 
     # Check the parser
     if args.parser == "html.parser" and sys.version_info < (2, 7, 3):
-        logging.info("Warning: 'html.parser' may cause problems"
-                     " on Python < 2.7.3")
+        logging.warning("Warning: 'html.parser' may cause problems"
+                        " on Python < 2.7.3")
     if args.parser not in ['html5lib', 'html.parser', 'lxml']:
         logging.error("Invalid parser: '%s',"
                       " choose from 'html5lib', 'html.parser', 'lxml'",
