@@ -210,3 +210,14 @@ def clean_url(url):
     return url
 
 
+def sanitize_filename(s):
+    """
+    ensure a clean, valid filename
+    """
+
+    s = s.replace('\x00', ' ').strip()
+    s = re.sub(r'[\\/:"*?<>|]', '-', s)
+
+    return s
+
+
