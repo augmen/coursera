@@ -101,14 +101,54 @@ class CourseraDownloader(object):
     """
 
     def __init__(self, params):
-        # TODO: this is a simple hack, something more elaborate needed
-        # Linux max path length is typically around 4060 so assume that's ok
-        if not params.max_filename_length and platform.system() == "Windows":
-            params.max_filename_length = 90
-            logging.info("Maximum filename length set to %s",
-                         params.max_filename_length)
-
         self.params = params
+
+        defaults = {
+            'preview': False,
+            'about': False,
+            'reverse': False,
+            'parser': 'html5lib',
+            'proxy': None,
+            'hooks': [],
+            'username': None,
+            'password': None,
+            'playlist': False,
+            'sections': [],
+            'formats': [],
+            'skip_formats': [],
+            'section_filter': None,
+            'lecture_filter': None,
+            'resource_filter': None,
+            'destination': None,
+            'output_template': None,
+            'archive': False,
+            'overwrite': False,
+            'max_filename_length': None,
+            'wget': None,
+            'curl': None,
+            'aria2': None,
+            'axel': None,
+            'cookies': None,
+            'lectures_page': None,
+            'skip_download': None,
+            'simulate': False,
+            'cache_dir': None
+        }
+        for d in defaults:
+            setattr(self, d, params.get(d, defaults[d]))
+
+        # Linux max path length is typically around 4060 so assume that's ok
+        if not self.max_filename_length and platform.system() == "Windows":
+            self.max_filename_length = 120
+            logging.info("Maximum filename length set to %s",
+                         self.max_filename_length)
+
+        if not self.output_template:
+            self.output_template = "{section_index} {section_name}/" \
+                                   "{lecture_index} {lecture_name} {name}{ext}"
+
+        self.formats = [s.lower() for s in self.formats]
+        self.skip_formats = [s.lower() for s in self.skip_formats]
 
 
 def parse_args():
