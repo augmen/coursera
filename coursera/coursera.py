@@ -50,6 +50,7 @@ import platform
 import shutil
 import sys
 import tempfile
+import time
 
 import requests
 
@@ -395,6 +396,47 @@ class CourseraDownloader(object):
             logging.warning("Warning: failed to open the direct"
                             " video link %s: %s",
                             resource['url'], e)
+
+    def _download(self, url, filepath):
+        try:
+            response = self.get_response(url, stream=True)
+            full_size = response.headers.get('content-length')
+            done_size = 0
+            slice_size = 524288  # 512KB buffer
+            last_time = time.time()
+            with open(filepath, 'wb') as f:
+                for data in response.iter_content(slice_size):
+                    f.write(data)
+                    try:
+                        percent = int(float(done_size) / full_size * 100)
+                    except:
+                        percent = 0
+                    try:
+                        cur_time = time.time()
+                        speed = float(slice_size) / float(
+                            cur_time - last_time)
+                        last_time = cur_time
+                    except:
+                        speed = 0
+                    if speed < 1024:
+                        speed_str = '{:.1f} B/s'.format(speed)
+                    elif speed < 1048576:
+                        speed_str = '{:.1f} KB/s'.format(speed / 1024)
+                    else:
+                        speed_str = '{:.1f} MB/s'.format(speed / 1048576)
+                    status_str = 'status: {:2d}% {}'.format(
+                        percent, speed_str)
+                    sys.stdout.write(
+                        status_str + ' ' * (25 - len(status_str)) + '\r')
+                    sys.stdout.flush()
+                    done_size += slice_size
+            response.close()
+            sys.stdout.write(' ' * 25 + '\r')
+            sys.stdout.flush()
+        except Exception as e:
+            logging.error(e)
+            return False
+        return True
 
 
 def parse_args():
