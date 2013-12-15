@@ -733,9 +733,8 @@ def parse_args():
 
     parser = argparse.ArgumentParser(
         prog='coursera-dl',
-        description="""Coursera-dl is a python package for downloading
-        course videos and resources available at coursera.org.
-        """,
+        description="Coursera-dl is a python package for downloading "
+                    "course videos and resources available at coursera.org.",
         add_help=False,
         formatter_class=HelpFormatter)
 
