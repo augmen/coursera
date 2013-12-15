@@ -44,9 +44,11 @@ from __future__ import unicode_literals
 
 import argparse
 import getpass
+import json
 import logging
 import os
 import platform
+import re
 import shutil
 import sys
 import tempfile
@@ -459,6 +461,24 @@ class CourseraDownloader(object):
             logging.error(e)
             return False
         return True
+
+    def download_about(self, course, course_dir):
+        """
+        Download the 'about' json file
+        """
+        fn = os.path.join(course_dir, course + '-about.json')
+
+        # get the base course name (without the -00x suffix)
+        base_name = re.split('(-[0-9]+)', course)[0]
+
+        # get the json
+        about_url = ABOUT_URL.format(course=base_name)
+        data = self.get_json(about_url)
+
+        # pretty print to file
+        with open(fn, 'w') as f:
+            json_data = json.dumps(data, indent=4, separators=(',', ':'))
+            f.write(json_data)
 
 
 def parse_args():
