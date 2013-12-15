@@ -199,6 +199,19 @@ def mkdir_p(path, mode=0o777):
             raise
 
 
+def filename_from_header(header):
+    try:
+        cd = header['Content-Disposition']
+        pattern = 'attachment; filename="(.*?)"'
+        m = re.search(pattern, cd)
+        g = m.group(1)
+        if "%" in g:
+            g = unquote(g)
+        return sanitize_filename(g)
+    except Exception:
+        return ''
+
+
 def resource_filename_from_url(url):
     """
     Extract the resource filename from the given url. We use this to skip
