@@ -1124,5 +1124,14 @@ def main():
     # Instantiate the downloader class
     d = CourseraDownloader(vars(args))
 
+    # Download the content
+    try:
+        for i, course in enumerate(args.course, start=1):
+            logging.info("\nCourse %d of %d: %s", i, len(args.course), course)
+            d.download_course(course)
+    except KeyboardInterrupt as e:
+        print_("Keyboard Interrupt")
+    except Exception as e:
+        logging.exception(e)
 if __name__ == '__main__':
     main()
