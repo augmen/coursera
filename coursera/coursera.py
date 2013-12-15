@@ -297,19 +297,41 @@ class CourseraDownloader(object):
         r.close()
         return data
 
-    def get_sections(self, course_url):
+    def get_lectures_page(self, course_url):
         """
-        Given the video lecture URL of the course, return a list of all
-        sections, including lectures and resources
+        Get the course lectures page.
+
+        If we are instructed to use a local page and it already exists, then
+        that page is used instead of performing a download.  If we are
+        instructed to use a local page and it does not exist, then we download
+        the page and save a copy of it for future use.
         """
-        logging.info("* Collecting sections from %s", course_url)
 
-        # get the course lecture page
-        lecture_page = self.get_page(course_url)
+        if not (self.lectures_page and os.path.exists(self.lectures_page)):
+            logging.info("* Collecting sections from %s", course_url)
 
-        return self.extract_sections(lecture_page)
+            # get the course lecture page
+            lectures_page = self.get_page(course_url)
+
+            # cache the page if we're in 'local' mode
+            if self.lectures_page and not self.simulate:
+                with open(self.lectures_page, 'w') as f:
+                    logging.info("* Writing lectures page to %s",
+                                 self.lectures_page)
+                    f.write(lectures_page)
+        else:
+            with open(self.lectures_page) as f:
+                lectures_page = f.read()
+            logging.info('* Collecting sections from local file %s',
+                         self.lectures_page)
+
+        return lectures_page
 
     def extract_sections(self, lecture_page):
+        """
+        Given the lecture_page of the course, return a list of all
+        sections, including lectures and resources
+        """
         soup = BeautifulSoup(lecture_page, self.parser)
 
         # extract the sections
@@ -609,7 +631,9 @@ class CourseraDownloader(object):
         # get the lecture url
         course_url = self.lecture_url_from_course(course, self.preview)
 
-        sections = self.get_sections(course_url)
+        lectures_page = self.get_lectures_page(course_url)
+
+        sections = self.extract_sections(lectures_page)
 
         if not sections:
             logging.warning("Warning: no sections found for %s,"
