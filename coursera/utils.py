@@ -273,5 +273,3 @@ def sanitize_filename(s):
     s = re.sub(r'[\\/:"*?<>|]', '-', s)
 
     return s
-
-
