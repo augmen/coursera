@@ -170,6 +170,10 @@ class CourseraDownloader(object):
         self.downloader = None
         self.session = None
         self.new_session()
+
+        self._downloads = {}
+        self._failed_downloads = []
+
     def new_session(self):
         self.session = requests.Session()
 
@@ -423,6 +427,114 @@ class CourseraDownloader(object):
             logging.warning("Warning: failed to open the direct"
                             " video link %s: %s",
                             resource['url'], e)
+
+    def _skip_resource(self, resource):
+        if resource['ext']:
+            ext = resource['ext'].lower()
+            if (self.formats and ext not in self.formats) or \
+               (self.skip_formats and ext in self.skip_formats):
+                logging.info('Skipping "%s" (extension ".%s" ignored)',
+                             resource['name'], resource['ext'])
+                return True
+        return False
+
+    def download(self, url, context, destination):
+        """
+        Download the url to the given destination directory. The output
+        template is used to determine the filename, the context contains
+        the template output values.
+        """
+
+        # Check if we should skip it
+        # Do this before fetching the filename, so we can skip broken urls
+        if self._skip_resource(context):
+            return False
+
+        # If the template requires the filename we try to get the correct
+        # filename.
+        if not self.simulate and \
+           "filename" in self.output_template_fields:
+            # get the headers
+            logging.debug("Getting filename for: %s", url)
+            headers = self.get_headers(url)
+
+            filename = filename_from_header(headers)
+            if filename:
+                context['filename'] = filename
+                _, ext = path.splitext(filename)
+                ext = ext.lstrip('.')
+                if ext:
+                    context['ext'] = ext
+                    # Again, check if we should skip it
+                    if self._skip_resource(context):
+                        return False
+
+        context['ext'] = '.' + context['ext']
+        for k in context:
+            context[k] = sanitize_filename(context[k])
+
+        filepath = self.output_template.format(**context)
+
+        if self.max_filename_length:
+            #TODO, can use string formatting
+            pass
+            #filepath = trim_path(filepath, self.max_filename_length)
+
+        filepath = os.path.join(destination, filepath)
+
+        # Prevent filename collision
+        if self._downloads.get(filepath):
+            fpath, fname = path.split(filepath)
+            name, ext = path.splitext(fname)
+            count = self._downloads.get(filepath)
+            new_fname = '{0} ({1}){2}'.format(name, count, ext)
+            self._downloads[filepath] = count + 1
+            filepath = os.path.join(fpath, new_fname)
+            logging.warning("Warning: Downloading %s to %s, %s already"
+                            " contains a file with the same name",
+                            fname, new_fname, fpath)
+
+        if path.exists(filepath):
+            logging.debug('%s already exists', filepath)
+            if self.overwrite:
+                logging.info('Downloading "%s" (overwriting)',
+                             context['name'])
+            else:
+                logging.info('Skipping "%s" (already exists)',
+                             context['name'])
+                return True
+        else:
+            logging.info('Downloading "%s"', context['name'])
+
+        logging.debug("Download url %s to %s", url, filepath)
+
+        if self.simulate:
+            self._downloads[filepath] = 1
+            return True
+
+        # Make sure subdirectories are created
+        head, tail = path.split(filepath)
+        mkdir_p(head)
+
+        if self.downloader:
+            ok = self.downloader.download(url, filepath)
+            # Clear output
+            # Cursor up one line
+            sys.stdout.write("\033[A")
+            # Clear to the end of line
+            sys.stdout.write("\033[K")
+            sys.stdout.flush()
+        else:
+            ok = self._download(url, filepath)
+        if not ok:
+            logging.error("Failed to download url %s to %s",
+                          url, filepath)
+            self._failed_downloads.append(filepath)
+            return False
+
+        self._downloads[filepath] = 1
+
+        return True
 
     def _download(self, url, filepath):
         try:
