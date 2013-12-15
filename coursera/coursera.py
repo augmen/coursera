@@ -161,6 +161,9 @@ class CourseraDownloader(object):
             self.output_template = "{section_index} {section_name}/" \
                                    "{lecture_index} {lecture_name} {name}{ext}"
 
+        self.output_template_fields = re.findall(
+            r"{([^{}]*)}", self.output_template)
+
         self.formats = [s.lower() for s in self.formats]
         self.skip_formats = [s.lower() for s in self.skip_formats]
 
