@@ -51,6 +51,7 @@ import platform
 import re
 import shutil
 import sys
+import tarfile
 import tempfile
 import time
 
@@ -594,6 +595,136 @@ class CourseraDownloader(object):
         with open(fn, 'w') as f:
             json_data = json.dumps(data, indent=4, separators=(',', ':'))
             f.write(json_data)
+
+    def download_course(self, course):
+        """
+        Download all the contents (videos, lecture notes, subtitles, ...).
+
+        Returns True on success.
+        """
+
+        if not self.preview and not self.get_course_cookies(course):
+            return False
+
+        # get the lecture url
+        course_url = self.lecture_url_from_course(course, self.preview)
+
+        sections = self.get_sections(course_url)
+
+        if not sections:
+            logging.warning("Warning: no sections found for %s,"
+                            " did you accept the honour code?",
+                            course)
+            return
+        else:
+            logging.info(
+                "* Retrieved %d sections, %d lectures and %d resources.",
+                len(sections),
+                sum(len(s["lectures"]) for s in sections),
+                sum(len(l["resources"])
+                    for s in sections for l in s["lectures"]))
+
+        if self.reverse:
+            sections.reverse()
+            logging.info("* Sections reversed")
+
+        # where the course will be downloaded to
+        course_dir = path.abspath(path.join(self.destination, course))
+
+        # add suffix to prevent removing already downloaded content
+        if self.archive:
+            course_dir += '_tar'
+
+        if not self.simulate:
+            # ensure the course dir exists
+            mkdir_p(course_dir)
+
+        logging.info("* %s will be downloaded to %s", course, course_dir)
+
+        # download the standard pages
+        # TODO: does not retrieve images/js/css ...
+        # logging.info(" - Downloading lecture/syllabus pages")
+        # self.download(self.HOME_URL %
+        #               course, target_dir=course_dir,
+        #               target_fname="index.html")
+        # self.download(course_url,
+        #               target_dir=course_dir, target_fname="lectures.html")
+        if self.about:
+            logging.info("Downloading about.json")
+            try:
+                if not self.simulate:
+                    self.download_about(course, course_dir)
+            except Exception as e:
+                logging.warning("Warning: failed to download about file %s", e)
+
+        self._downloads = {}
+        self._failed_downloads = []
+
+        indent()
+        # now download the actual content (video's, lecture notes, ...)
+        for j, section in enumerate(sections, start=1):
+            if self.sections and j not in self.sections:
+                logging.info("Skipping %s (index = %d)", section['name'], j)
+                continue
+
+            if self.section_filter and \
+               not re.search(self.section_filter, section['name']):
+                logging.info('Skipping %s (filter = "%s")',
+                             section['name'], self.section_filter)
+                continue
+
+            logging.info("%s", section['name'])
+
+            indent()
+            for i, lecture in enumerate(section['lectures'], start=1):
+                if self.lecture_filter and \
+                   not re.search(self.lecture_filter, lecture['name']):
+                    logging.info('Skipping %s (filter "%s")',
+                                 lecture['name'], self.lecture_filter)
+                    continue
+
+                logging.info("Downloading resources for %s", lecture['name'])
+
+                indent()
+                # download each resource
+                for resource in lecture['resources']:
+                    if self.resource_filter and \
+                       not re.search(self.resource_filter, resource['name']):
+                        logging.info('Skipping %s (filter "%s")',
+                                     resource['name'], self.resource_filter)
+                        continue
+
+                    context = {
+                        'course': course,
+                        'section_index': "{:02d}".format(j),
+                        'section_name': section['name'],
+                        'lecture_index': "{:02d}".format(i),
+                        'lecture_name': lecture['name'],
+                        }
+                    context.update(resource)
+
+                    self.download(resource['url'], context, course_dir)
+                indent(-1)
+            indent(-1)
+        indent(-1)
+
+        if len(self._downloads) or len(self._failed_downloads):
+            logging.info("Successfully downloaded %d of %d files.",
+                         len(self._downloads),
+                         len(self._downloads) + len(self._failed_downloads))
+        else:
+            logging.info("There are no resources to download.")
+
+        if self.archive:
+            tar_file_name = course + ".tar.gz"
+            tar_path = os.path.join(self.destination, tar_file_name)
+            logging.info("Compressing and storing as %s", tar_file_name)
+            if not self.simulate:
+                tar = tarfile.open(tar_path, 'w:gz')
+                tar.add(course_dir, arcname=course)
+                tar.close()
+                shutil.rmtree(course_dir)
+            logging.info("Compression complete. Cleaning up.")
 
 
 def parse_args():
