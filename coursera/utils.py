@@ -97,6 +97,15 @@ class IndentingFormatter(logging.Formatter):
         return logging.Formatter.format(self, record)
 
 
+class CountingFilter(logging.Filter):
+    def __init__(self, name=''):
+        logging.Filter.__init__(self, name)
+        self.count = {}
+
+    def filter(self, record):
+        self.count[record.levelno] = self.count.get(record.levelno, 0) + 1
+        return True
+
 
 def netrc_paths():
     """
