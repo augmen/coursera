@@ -58,6 +58,7 @@ from bs4 import BeautifulSoup
 from six import iteritems, print_
 
 import cookies
+import downloaders
 import _version
 
 from define import ABOUT_URL, LECTURE_URL, PREVIEW_URL
@@ -161,6 +162,7 @@ class CourseraDownloader(object):
         self.formats = [s.lower() for s in self.formats]
         self.skip_formats = [s.lower() for s in self.skip_formats]
 
+        self.downloader = None
         self.session = None
         self.new_session()
     def new_session(self):
@@ -171,7 +173,27 @@ class CourseraDownloader(object):
             self.session.proxies = {'http': self.proxy}
         self.session.params['timeout'] = self.TIMEOUT
 
+        self._downloader()
+
         return self.session
+
+    def _downloader(self):
+        """
+        Decides which downloader to use.
+        """
+
+        external = {
+            'wget': downloaders.WgetDownloader,
+            'curl': downloaders.CurlDownloader,
+            'aria2': downloaders.Aria2Downloader,
+            'axel': downloaders.AxelDownloader,
+        }
+
+        for bin, klass in iteritems(external):
+            if self.params.get(bin):
+                self.downloader = klass(self.session,
+                                        bin=self.params.get(bin))
+                break
 
     def get_course_cookies(self, course):
         """
