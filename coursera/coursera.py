@@ -52,6 +52,10 @@ import sys
 import tempfile
 
 import requests
+
+from bs4 import BeautifulSoup
+from six import iteritems, print_
+
 import cookies
 import _version
 
@@ -259,6 +263,138 @@ class CourseraDownloader(object):
         data = r.json()
         r.close()
         return data
+
+    def get_sections(self, course_url):
+        """
+        Given the video lecture URL of the course, return a list of all
+        sections, including lectures and resources
+        """
+        logging.info("* Collecting sections from %s", course_url)
+
+        # get the course lecture page
+        lecture_page = self.get_page(course_url)
+
+        return self.extract_sections(lecture_page)
+
+    def extract_sections(self, lecture_page):
+        soup = BeautifulSoup(lecture_page, self.parser)
+
+        # extract the sections
+        section_headers = soup.findAll("div",
+                                       {"class": "course-item-list-header"})
+        sections = []
+
+        for section_header in section_headers:
+            # title of this section
+            h3 = section_header.findNext('h3')
+            assert h3 is not None, "couldn't find section"
+            section = {
+                'name': h3.text.strip(),
+                'lectures': []
+            }
+
+            # get all the lectures for this section
+            ul = section_header.next_sibling
+            lecture_list = ul.findAll('li')
+
+            for lecture_list_item in lecture_list:
+                assert lecture_list_item.a is not None, "couldn't get lecture"
+                lecture = {
+                    'name': lecture_list_item.a.find(text=True).strip(),
+                    'time': None,
+                    'resources': []
+                }
+
+                # collect all the resources for this lecture (ppt, mp4, ...)
+                lecture_resources = lecture_list_item.find(
+                    'div', {'class': 'course-lecture-item-resource'})
+                resource_links = lecture_resources.findAll('a') \
+                    if lecture_resources else []
+
+                for resource_link in resource_links:
+                    resource_url = clean_url(resource_link.get('href'))
+                    if not resource_url:
+                        continue
+                    resource = {
+                        'url': resource_url,
+                        'name': resource_link.get('title', '').strip(),
+                        # for simulation purposes, we use the http headers
+                        # for the actual downloading
+                        'filename': resource_filename_from_url(resource_url)
+                    }
+                    _, resource['ext'] = path.splitext(resource['filename'])
+                    resource['ext'] = resource['ext'].lstrip('.')
+
+                    # Sometimes the raw, uncompressed source videos are
+                    # available as well. Don't download them as they are huge
+                    # and available in compressed form anyway.
+                    if resource['url'].find('source_videos') > 0:
+                        logging.info("will skip raw source video %s",
+                                     resource['url'])
+                    else:
+                        # Skip files without extension if they are not
+                        # served from cloudfront.net. For instance, some
+                        # courses add links to wikipedia, forum, ... .
+                        if resource['ext'] or "cloudfront.net" in resource_url:
+                            lecture['resources'].append(resource)
+
+                # Check if the video is included in the resources, if not, try
+                # to download it via the modal window.
+                # Preview pages do not have resources, so in that case we also
+                # use the modal window.
+                if not any(r['ext'] == "mp4" for r in lecture['resources']):
+                    lecture_link = lecture_list_item.find(
+                        'a', {'class': 'lecture-link'})
+                    if not lecture_link.has_attr('data-modal-iframe'):
+                        continue
+
+                    lecture_url = clean_url(lecture_link['data-modal-iframe'])
+                    logging.info('Lecture "%s" has hidden resources',
+                                 lecture['name'])
+                    self._get_hidden_resources(lecture, lecture_url)
+
+                section['lectures'].append(lecture)
+
+            sections.append(section)
+
+        return sections
+
+    def _get_hidden_resources(self, lecture, lecture_url):
+        try:
+            page = self.get_page(lecture_url)
+            bb = BeautifulSoup(page, self.parser)
+            vobj = bb.find('source', type="video/mp4")
+
+            if not vobj:
+                logging.warning(
+                    "Warning: Failed to find video for %s",
+                    lecture['name'])
+            else:
+                resource = {
+                    'url': clean_url(vobj['src']),
+                    'name': lecture['name'].strip(),
+                    'filename': 'video.mp4',
+                    'ext': 'mp4'
+                }
+                lecture['resources'].append(resource)
+                subtitle_tracks = bb.findAll(
+                    'track', {'kind': 'subtitles'}) or []
+
+                for subtitle_track in subtitle_tracks:
+                    lang = subtitle_track.get('srclang').strip()
+                    resource = {
+                        'url': clean_url(subtitle_track['src']),
+                        'name': 'Subtitles ' + lang,
+                        'filename': 'Subtitles ' + lang + '.srt',
+                        'ext': 'srt'
+                    }
+                    lecture['resources'].append(resource)
+        except requests.exceptions.HTTPError as e:
+            # sometimes there is a lecture without a video (e.g.,
+            # genes-001) so this can happen.
+            logging.warning("Warning: failed to open the direct"
+                            " video link %s: %s",
+                            resource['url'], e)
 
 
 def parse_args():

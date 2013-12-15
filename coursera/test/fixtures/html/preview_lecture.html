@@ -1,0 +1,539 @@
+
+
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="utf-8" />
+    <title>View</title>
+    <style>
+        body {
+            padding: 10px;
+        }
+        .hidden {
+            position: absolute !important;
+            clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
+            clip: rect(1px, 1px, 1px, 1px);
+        }
+    </style>
+
+    <link rel="stylesheet" href="https://dt5zaw6a98blc.cloudfront.net/site-static/c6353d3246b8ec4110a28b592fe904af04069037/spark/app/lecture/mediaelement/mediaelementplayer.css" />
+    <link rel="stylesheet" href="https://dt5zaw6a98blc.cloudfront.net/site-static/c6353d3246b8ec4110a28b592fe904af04069037/spark/app/lecture/mediaelement/mediaelementplayer_assets.css" />
+    <link rel="stylesheet" href="https://dt5zaw6a98blc.cloudfront.net/site-static/c6353d3246b8ec4110a28b592fe904af04069037/bundles/jquery-ui/css/smoothness/jquery-ui.css" />
+    <link rel="stylesheet" href="https://dt5zaw6a98blc.cloudfront.net/site-static/c6353d3246b8ec4110a28b592fe904af04069037/css/spark.lecture.css" />
+    <link rel="stylesheet" href="https://dt5zaw6a98blc.cloudfront.net/site-static/c6353d3246b8ec4110a28b592fe904af04069037/spark/core/css/sdbuttons.css" />
+    <!--[if lte IE 8]><link rel="stylesheet" href="https://dt5zaw6a98blc.cloudfront.net/site-static/c6353d3246b8ec4110a28b592fe904af04069037/spark/core/css/sdbuttons-ie.css" /><![endif]-->
+
+</head>
+
+<body>
+
+<div>
+<script src="https://dt5zaw6a98blc.cloudfront.net/site-static/c6353d3246b8ec4110a28b592fe904af04069037/spark/spark.js"></script>
+
+<script>window.onerror = function(message, url, lineNum) {
+
+    // First check the URL and line number of the error
+    url = url || window.location.href;
+    // 99% of the time, errors without line numbers arent due to our code,
+    // they are due to third party plugins and browser extensions
+    if (lineNum === undefined || lineNum == null) return;
+
+    // Now figure out the actual error message
+    // If it's an event, as triggered in several browsers
+    if (message.target && message.type) {
+        message = message.type;
+    }
+    if (!message.indexOf) {
+        message = 'Non-string, non-event error: ' + (typeof message);
+    }
+
+    var errorDescrip = {
+        message: message,
+        script: url,
+        line: lineNum,
+        url: document.URL
+    }
+
+    var err = {
+        key: 'page.error.javascript',
+        value: errorDescrip
+    }
+
+    window._204 = window._204 || [];
+    window._204.push(err);
+
+    window._gaq = window._gaq || [];
+    window._gaq.push(err);
+}</script>
+<script type="text/javascript">
+    // SET UP THE MULTITRACKER
+    window.logger = window.Log({level:"error"});
+    var parts = location.host.split(".");
+    while(parts.length > 2) { parts.shift(); }
+
+    window.multitracker = window.MultiTracker({logger:window.logger});
+    window.multitracker.register('204', window._204 = window._204 || []);
+    window.multitracker.register('ga', window._gaq = window._gaq || [], 'google');
+
+    // SET UP GA and 204
+    window._gaq.push(['_setAccount', 'UA-28377374-1']);
+    window._gaq.push(['_setDomainName', 'coursera.org']);
+    window._gaq.push(['_setAllowLinker', true]);
+    window._gaq.push(['_trackPageview']);
+
+    // configure 204 with the following settings
+    window._204.push(["client", "spark"]);
+    window._204.push(["user", 0]);
+    window._204.push(["domain", "." + parts.join(".")]);
+
+    // set off the first event
+    window._204.push({key:"pageview", val:{}});
+
+    // override our multitracker queues with the ga queue when it is ready
+    (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+
+        ga.onload = ga.onreadystatechange = function() {
+            ga.onreadystatechange = ga.onload = null;
+            window.multitracker.get('ga').queue = window._gaq;
+        };
+    })();
+
+    // override our multitracker queues with the 204 queue when it is ready
+    (function() {
+        var a = document.createElement('script'); a.type = 'text/javascript'; a.async = true;
+        a.src = 'https://eventing.coursera.org/204.min.js';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(a, s);
+        a.onload = a.onreadystatechange = function() {
+            a.onreadystatechange = a.onload = null;
+            window.multitracker.get('204').queue = window._204;
+        };
+    })();
+</script>
+
+<script>
+    // Set up shared AB testing object
+    (function() {
+        window.ab = {};
+
+        // we want to share the 204 session cookie with the AB session cookie...
+        var sessionId = AB.makeSession("__204u", {expires:365, domain:"." + location.host});
+
+        window.ab.user = window.AB(0, "user", {debug:true, tracker:window.multitracker, logger:window.logger});
+        window.ab.session = window.AB(sessionId, "session", {debug:true, tracker:window.multitracker, logger:window.logger});
+
+        if(window.CourseraABExperiments.user) {
+            window.ab.user.addExperiments(window.CourseraABExperiments.user);
+            window.ab.user.runExperimentsOn("body");
+        }
+
+        if(window.CourseraABExperiments.session) {
+            window.ab.session.addExperiments(window.CourseraABExperiments.session);
+            window.ab.session.runExperimentsOn("body");
+        }
+    })();
+</script>
+
+
+<script>
+    function isChina(){
+        return false;
+    }
+</script>
+
+
+
+<div class="course-lecture-view">
+
+    <div id="lecture_view_dialog" role="dialog" aria-labelledby="lecture_title">
+
+        <div id="lecture_title" class="hidden">Using and Understanding Data</div>
+
+        <div id="QL_player_container_first">
+            <div class="hidden" id="QL_aria_announcer" aria-live="assertive" aria-relevant="all"></div>
+            <video controls="controls"
+                   id="QL_video_element_first"
+                   style="width:100% important!;">
+                <source type="video/mp4" src="http://d396qusza40orc.cloudfront.net/modelthinking/recoded_videos%2FL1D%20%5B0e586ab2%5D%20.mp4">
+                <source type="video/webm" src="http://d396qusza40orc.cloudfront.net/modelthinking/recoded_videos%2FL1D%20%5B0e586ab2%5D%20.webm">
+                <track kind="subtitles" srclang="en" src="https://class.coursera.org/modelthinking/lecture/subtitles?q=8_en">        </video>
+        </div>
+
+        <div class="course-quiz-container course-share-video-overlay QL_overlay QL_scale">
+            <div class='course-share-video-overlay-link-box'>
+                <h1>Enjoyed the video? Share it with your friends:</h1><br /><br />
+                <input class="course-lecture-share-copy-page-link" type="text" onClick="this.select();" readonly value="https://class.coursera.org/modelthinking/lecture/8?s=e" style="width: 400px"></input>
+
+                <div class="coursera-lecture-share-buttons",
+                style="margin-top: 20px;",
+                data-url="https://class.coursera.org/modelthinking/lecture/8",
+                data-text="Model Thinking: Using and Understanding Data",
+                data-facebook-picture="https://s3.amazonaws.com/coursera/topics/modelthinking/small-icon.hover.png",
+                data-facebook-name="Model Thinking: Using and Understanding Data",
+                data-facebook-redirect="http://www.facebook.com",
+                data-twitter-text-font="Watching Using and Understanding Data",
+                data-twitter-text-font=" in Model Thinking",
+                data-twitter-text-font=" on @Coursera",
+                data-twitter-hashtags="modelthinking",
+                data-facebook-refkey="fb-e",
+                data-twitter-refkey="tw-e",
+                data-googlePlus-refkey="gp-e",
+                data-weibo-refkey="wb-e",
+                data-renren-refkey="rr-e",
+                data-eventing-key="user.click.link.social.videoend",
+                data-eventing-value="30.8",
+                data-twitter-autobuild
+                ></div>
+        </div>
+        <a class='course-share-video-overlay-watch-next-video course-lecture-view-next-link' >Watch next video <i class='icon-chevron-right'></i></a>
+    </div>
+
+
+    <div class="course-lecture-view-controls-container">
+        <div class="course-lecture-view-controls">
+            <div class="course-lecture-view-speed-block" style="display: none">
+                <a href="javascript:void(0)" class="course-lecture-view-speed-minus course-lecture-controls-button" title="Slow down the video">
+                    <span class="icon-minus"></span>
+                </a>
+                <select class="course-lecture-view-speed-dropdown" style="display: none">
+                    <option value="0.75">.75x</option>
+                    <option value="1.0" selected>1x</option>
+                    <option value="1.25">1.25x</option>
+                    <option value="1.5">1.5x</option>
+                    <option value="1.75">1.75x</option>
+                    <option value="2">2x</option>
+                </select>
+                <span class="course-lecture-view-speed-label">1x</span>
+                <a href="javascript:void(0)" class="course-lecture-view-speed-plus course-lecture-controls-button" title="Speed up the video">
+                    <span class="icon-plus"></span>
+                </a>
+            </div>
+
+
+            <div class="course-lecture-view-middle-controls-block">
+
+                <a class="course-lecture-controls-icon-label course-lecture-view-share-link"
+                   aria-haspopup="true" aria-expanded="false" aria-owns="course-lecture-share-popup"
+                   data-popup="#course-lecture-share-popup" data-popup-item="div.course-lecture-share-popup-item"
+                   data-popup-offset-y="-7" data-popup-offset-x="5" data-popup-direction="n" data-popup-bind-open="mouseenter" data-popup-close
+                   tabindex="0" role="button"
+                        >
+                  <span class="icon-share"> Share
+                </a>
+
+                <div id="course-lecture-share-popup" class="course-lecture-view-popup" style="display: none; position: absolute; z-index: 10000;">
+                    <div class="course-lecture-popup-sublist">
+                        <div class="course-lecture-popup-sublist-title">Share this lecture</div>
+                        <div class="course-lecture-popup-sublist-item">
+                            <input class="course-lecture-share-copy-page-link" type="text" onClick="this.select();" readonly value="https://class.coursera.org/modelthinking/lecture/8" style="width: 400px"></input>
+                        </div>
+                        <div class="course-lecture-popup-sublist-title">
+                            <div class="coursera-lecture-share-buttons coursera-share-buttons",
+                            data-url="https://class.coursera.org/modelthinking/lecture/8",
+                            data-text="Model Thinking: Using and Understanding Data",
+                            data-facebook-picture="https://s3.amazonaws.com/coursera/topics/modelthinking/small-icon.hover.png",
+                            data-facebook-name="Model Thinking: Using and Understanding Data",
+                            data-facebook-redirect="http://www.facebook.com",
+                            data-twitter-text-font="Watching Using and Understanding Data",
+                            data-twitter-text-font=" in Model Thinking",
+                            data-twitter-text-font=" on @Coursera",
+                            data-twitter-hashtags="modelthinking",
+                            data-eventing-key="user.click.link.social",
+                            data-eventing-value="30.8",
+                            data-twitter-autobuild,
+                            data-icon
+                            ></div>
+                    </div>
+                    <div class="course-lecture-popup-arrow"></div>
+                </div>
+            </div>
+
+
+        </div>
+
+        <div class="course-lecture-view-right-controls-block" >
+
+            <a href="javascript:void(0)" class="course-lecture-view-set-cuepoint-link course-lecture-controls-button" style="display: none">Set Cuepoint</a>
+
+            <a href="javascript:void(0)" class="course-lecture-view-prev-link course-lecture-controls-button" style="display: none">&laquo; Prev</a>
+
+            <a href="javascript:void(0)" class="course-lecture-view-next-link course-lecture-controls-button" style="display: none">Next &raquo;</a>
+            &nbsp; &nbsp; &nbsp; &nbsp;
+
+            <a class="course-lecture-controls-label course-lecture-view-shortcuts-link" href="javascript:void(0)">
+                <span class="icon-info-sign">
+                    <span class="accessible-text-for-reader">Discover keyboard shortcuts</span>
+                </span>
+            </a>
+
+            <a class="course-lecture-controls-label course-lecture-view-player-link"
+               aria-haspopup="true" aria-expanded="false" aria-owns="course-lecture-toggle-player-popup"
+               data-popup="#course-lecture-toggle-player-popup" data-popup-item="div.course-lecture-toggle-player-popup-item" data-popup-close
+               data-popup-direction="none" data-popup-bind-open="mouseenter"
+               tabindex="0" role="button"
+                    >
+
+                <span class="icon-cog"></span>
+            </a>
+
+            <div id="course-lecture-toggle-player-popup" class="course-lecture-view-popup" style="display: none; position: absolute; z-index: 10000; bottom: 40px; right: -17px">
+                <div class="course-lecture-popup-sublist" style="margin-bottom: -3px">
+                    <div class="course-lecture-popup-sublist-item">
+                        <a href="javascript:switchPlayer('flash');">
+                            Having trouble viewing the lecture? <br /><span style="color:blue;display:inline;">Click here</span> to change the video player. <br/>Your current player is html5.
+                        </a>
+                    </div>
+                </div>
+                <div class="course-lecture-popup-arrow" style="left: auto; right: 18px"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="course-lecture-view-shortcuts-block" aria-live="assertive" role="alert">
+    Keyboard Controls
+    <ul>
+        <li><strong>H:</strong> Show / hide shortcuts</li>
+        <li><strong>P:</strong> Play/Pause</li>
+        <li><strong>Up:</strong> Increase volume</li>
+        <li><strong>Down:</strong> Decrease volume</li>
+        <li><strong>Left:</strong> Skip Back</li>
+        <li><strong>Right:</strong> Skip Forward</li>
+        <li><strong>-:</strong> Decrease Speed</li>
+        <li><strong>+:</strong> Increase Speed</li>
+        <li><strong>F:</strong> Toggle fullscreen</li>
+        <li><strong>C:</strong> Toggle captions</li>
+        <li><strong>Esc:</strong> Close video</li>
+    </ul>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<script src="https://dt5zaw6a98blc.cloudfront.net/site-static/c6353d3246b8ec4110a28b592fe904af04069037/spark/spark.js"></script>
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  config: ["MMLorHTML.js"],
+
+  styleSheets: [],
+  styles: {},
+
+  jax: ["input/TeX"],
+
+  extensions: ["tex2jax.js"],
+
+  preJax: null,
+  postJax: null,
+
+  preRemoveClass: "MathJax_Preview",
+
+  showProcessingMessages: true,
+
+  messageStyle: "none",
+
+  displayAlign: "center",
+  displayIndent: "0em",
+
+  delayStartupUntil: "none",
+
+  skipStartupTypeset: false,
+
+  elements: [],
+
+  tex2jax: {
+	    inlineMath: [
+	                 ['$$','$$'],      // uncomment this for standard TeX math delimiters
+	                 ['\\(','\\)']
+	                 ],
+
+	                 displayMath: [
+	                 ['\\[','\\]']
+	                 ],
+
+    skipTags: ["script","noscript","style","textarea","pre","code"],
+    ignoreClass: "tex2jax_ignore",
+    processClass: "tex2jax_process",
+    processEscapes: false,
+    processEnvironments: true,
+    preview: "TeX"
+
+  },
+
+  mml2jax: {
+    preview: "alttext"
+
+  },
+
+  jsMath2jax: {
+    preview: "TeX"
+
+  },
+
+  TeX: {
+    TagSide: "right",
+    TagIndent: ".8em",
+    MultLineWidth: "85%",
+    Macros: {},
+
+    extensions: ["AMSmath.js", "AMSsymbols.js"]
+
+  },
+
+  //============================================================================
+  //
+  //  These parameters control the MathML inupt jax.
+  //
+  MathML: {
+    //
+    //  This specifies whether to use TeX spacing or MathML spacing when the
+    //  HTML-CSS output jax is used.
+    //
+    useMathMLspacing: false
+  },
+
+  //============================================================================
+  //
+  //  These parameters control the HTML-CSS output jax.
+  //
+  "HTML-CSS": {
+
+    scale: 100,
+
+    availableFonts: ["STIX","TeX"],
+
+    preferredFont: "TeX",
+
+    webFont: "TeX",
+
+    imageFont: "TeX",
+
+    undefinedFamily: "STIXGeneral,'Arial Unicode MS',serif",
+
+    showMathMenu: true,
+
+    styles: {},
+
+    tooltip: {
+      delayPost: 600,          // milliseconds delay before tooltip is posted after mouseover
+      delayClear: 600,         // milliseconds delay before tooltip is cleared after mouseout
+      offsetX: 10, offsetY: 5  // pixels to offset tooltip from mouse position
+    }
+  },
+
+  //============================================================================
+  //
+  //  These parameters control the NativeMML output jax.
+  //
+  NativeMML: {
+
+    scale: 100,
+
+    showMathMenu: true,
+    showMathMenuMSIE: true,
+
+    styles: {}
+  },
+
+  MathMenu: {
+    delay: 400,
+
+    helpURL: "http://www.mathjax.org/help/user/",
+
+    showRenderer: true,
+    showFontMenu: false,
+    showContext:  false,
+
+    windowSettings: {
+      status: "no", toolbar: "no", locationbar: "no", menubar: "no",
+      directories: "no", personalbar: "no", resizable: "yes", scrollbars: "yes",
+      width: 100, height: 50
+    },
+
+    styles: {}
+
+  },
+
+  MMLorHTML: {
+    prefer: {
+      MSIE:    "MML",
+      Firefox: "MML",
+      Opera:   "HTML",
+      other:   "HTML"
+    }
+  }
+});
+</script>
+<script type="text/javascript">
+    (function () {
+
+        function loadMathJax() {
+            var script = document.createElement("script");
+            script.type = "text/javascript";
+            script.src  = "https://duqnjvq4jwr55.cloudfront.net/2.1/MathJax.js";
+            document.getElementsByTagName("head")[0].appendChild(script);
+        }
+
+        window.loadOrRefreshMathJax = function(domId) {
+            if (window.MathJax) {
+                if (domId) {
+                    MathJax.Hub.Queue(["Typeset", MathJax.Hub, domId]);
+                } else {
+                    MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+                }
+            } else {
+                loadMathJax();
+            }
+        }
+    })();
+</script>
+<script type="text/javascript">
+
+    window._gaq = window._gaq || [];
+    window._gaq.push(['_setAccount', 'UA-28377374-1']);
+    window._gaq.push(['_setDomainName', 'coursera.org']);
+    window._gaq.push(['_setAllowLinker', true]);
+    window._gaq.push(['_trackPageview']);
+
+    (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+
+    window._204 = window._204 || [];
+    window._204.push({key:"pageview", val:{}});
+
+    (function()
+    {
+        var a = document.createElement('script'); a.type = 'text/javascript'; a.async = true;
+        a.src = 'https://eventing.coursera.org/204.min.js?client=spark&user=0';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(a, s);
+    })();
+
+</script>
+<script src="https://dt5zaw6a98blc.cloudfront.net/site-static/c6353d3246b8ec4110a28b592fe904af04069037/spark/app/lecture/mediaelement/mediaelement-and-player.js?config=default"></script>
+<script src="https://dt5zaw6a98blc.cloudfront.net/site-static/c6353d3246b8ec4110a28b592fe904af04069037/spark/core/js/jquery_ui.js"></script>
+<script src="https://dt5zaw6a98blc.cloudfront.net/site-static/c6353d3246b8ec4110a28b592fe904af04069037/spark/core/js/get_query_parameters.js"></script>
+<script src="https://dt5zaw6a98blc.cloudfront.net/site-static/c6353d3246b8ec4110a28b592fe904af04069037/spark/app/lecture/js/QL_Player.js"></script>
+<script src="https://eventing.coursera.org/204.min.js?client=spark&user=0" async="true"></script>
+<script src="https://dt5zaw6a98blc.cloudfront.net/site-static/c6353d3246b8ec4110a28b592fe904af04069037/spark/app/lecture/js/logger.js?version=20120528"></script>
+<script src="https://dt5zaw6a98blc.cloudfront.net/site-static/c6353d3246b8ec4110a28b592fe904af04069037/spark/app/lecture/js/init_logger.js?user_id=8&lecture_id=0"></script>
+<script src="https://dt5zaw6a98blc.cloudfront.net/site-static/c6353d3246b8ec4110a28b592fe904af04069037/spark/app/lecture/js/slide_viewer.js?version=20120316"></script>
+<script src="https://dt5zaw6a98blc.cloudfront.net/site-static/c6353d3246b8ec4110a28b592fe904af04069037/spark/app/lecture/js/iframe_viewer.js?version=20120529"></script>
+<script src="https://dt5zaw6a98blc.cloudfront.net/site-static/c6353d3246b8ec4110a28b592fe904af04069037/spark/app/lecture/js/jquery.ba-tinypubsub.js"></script>
+<script src="https://dt5zaw6a98blc.cloudfront.net/site-static/c6353d3246b8ec4110a28b592fe904af04069037/spark/app/lecture/js/lecture_view.js?lecture_player=html5&lecture_speed=1&lecture_id=8&quiz_id=8&preview=0&quiz_url=https%3A%2F%2Fclass.coursera.org%2Fmodelthinking%2Fquiz%2Fvideo_quiz_attempt&lecture_speed_url=https%3A%2F%2Fclass.coursera.org%2Fmodelthinking%2Fclass%2Fset_preferences&seekto=0&iframe_url=&version=20121003&disable_fullscreen=0&disable_autostart=0"></script>
+<script src="https://dt5zaw6a98blc.cloudfront.net/site-static/c6353d3246b8ec4110a28b592fe904af04069037/spark/core/js/jquery.sdbuttons.js?config=default"></script>
+<script type="text/javascript">$(function() { loadOrRefreshMathJax();})</script>
+<script src="https://dt5zaw6a98blc.cloudfront.net/site-static/c6353d3246b8ec4110a28b592fe904af04069037/js/lib/sharebuttons.js"></script>
+<script type="text/javascript">$(function() { $(".coursera-lecture-share-buttons").each(function() { new ShareButtons($(this), {isChina: isChina()}); }); });</script>
+
+</body>
+
+</html>
