@@ -1133,5 +1133,17 @@ def main():
         print_("Keyboard Interrupt")
     except Exception as e:
         logging.exception(e)
+    finally:
+        root = logging.getLogger()
+        if len(root.filters):
+            count = root.filters[0].count
+            if count.get(logging.WARNING):
+                print_("{0} warning(s) issued".format(
+                    count.get(logging.WARNING)))
+            if count.get(logging.ERROR):
+                print_("{0} error(s) reported".format(
+                    count.get(logging.ERROR)))
+
+
 if __name__ == '__main__':
     main()
